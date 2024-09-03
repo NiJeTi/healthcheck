@@ -3,6 +3,8 @@ package healthcheck
 import (
 	"context"
 	"errors"
+	"io"
+	"log/slog"
 	"testing"
 	"time"
 
@@ -43,6 +45,8 @@ func TestNew(t *testing.T) {
 }
 
 func TestHealthcheck_Handle(t *testing.T) {
+	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
+
 	tests := map[string]struct {
 		status Status
 		ctx    func() context.Context
