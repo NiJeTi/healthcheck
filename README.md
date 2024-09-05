@@ -61,6 +61,12 @@ func main() {
 }
 ```
 
+## Examples
+
+The following projects has successfully integrated Healthcheck:
+
+- [cinema-keeper](https://github.com/NiJeTi/cinema-keeper)
+
 ## License
 
 This project is licensed under the Apache-2.0 License.
