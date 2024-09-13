@@ -22,7 +22,7 @@ jobs:
         run: go mod download
 
       - name: 'Vet'
-        run: go vet . ./servers/http
+        run: go vet . ./servers/fasthttp ./servers/http
 
       - name: 'Test'
-        run: go test -v . ./servers/http
+        run: go test -v . ./servers/fasthttp ./servers/http
