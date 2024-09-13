@@ -8,10 +8,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/nijeti/healthcheck/internal/generated/mocks/github.com/nijeti/healthcheck"
+	"github.com/nijeti/healthcheck/internal/generated/mocks"
 )
 
 func TestWithLogger(t *testing.T) {
+	t.Parallel()
+
 	hc := &Healthcheck{}
 
 	assert.PanicsWithValue(
@@ -27,6 +29,8 @@ func TestWithLogger(t *testing.T) {
 }
 
 func TestWithProbe(t *testing.T) {
+	t.Parallel()
+
 	probe := healthcheck.NewMockProbe(t)
 
 	hc := &Healthcheck{
@@ -51,6 +55,8 @@ func TestWithProbe(t *testing.T) {
 }
 
 func TestWithSimpleProbe(t *testing.T) {
+	t.Parallel()
+
 	probe := func(_ context.Context) error {
 		return nil
 	}
@@ -76,6 +82,8 @@ func TestWithSimpleProbe(t *testing.T) {
 }
 
 func TestWithTimeoutDegraded(t *testing.T) {
+	t.Parallel()
+
 	hc := &Healthcheck{}
 
 	assert.PanicsWithValue(
@@ -98,6 +106,8 @@ func TestWithTimeoutDegraded(t *testing.T) {
 }
 
 func TestWithTimeoutUnhealthy(t *testing.T) {
+	t.Parallel()
+
 	hc := &Healthcheck{}
 
 	assert.PanicsWithValue(

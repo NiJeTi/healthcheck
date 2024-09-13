@@ -40,7 +40,7 @@ func main() {
 		),
 	)
 
-	// Setup the HTTP handler for the health check endpoint
+	// Set up the HTTP handler for the health check endpoint
 	http.HandleFunc(
 		"/health", func(writer http.ResponseWriter, request *http.Request) {
 			// Check all registered probes

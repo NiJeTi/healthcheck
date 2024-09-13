@@ -11,10 +11,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/nijeti/healthcheck/internal/generated/mocks/github.com/nijeti/healthcheck"
+	"github.com/nijeti/healthcheck/internal/generated/mocks"
 )
 
 func TestNew(t *testing.T) {
+	t.Parallel()
+
 	assert.PanicsWithValue(
 		t,
 		"healthcheck degradation timeout must be less than unhealthy timeout",
@@ -45,6 +47,8 @@ func TestNew(t *testing.T) {
 }
 
 func TestHealthcheck_Handle(t *testing.T) {
+	t.Parallel()
+
 	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	tests := map[string]struct {
