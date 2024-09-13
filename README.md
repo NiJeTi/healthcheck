@@ -6,59 +6,68 @@ Go package `healthcheck` provides a simple yet very convenient application healt
 
 - Lightweight and easy to integrate
 - Supports custom health check functions
-- Ready to be integrated with any HTTP-server of choice
+- Has ready-to-run support for the 2 most popular Go HTTP servers:
+  - `net/http` via `github.com/nijeti/healthcheck/servers/http`
+  - `fasthttp` via `github.com/nijeti/healthcheck/servers/fasthttp`
+- Ready to be integrated with any other server of choice
 
 ## Installation
 
-```sh
+### Library
+```shell
 go get github.com/nijeti/healthcheck
+```
+
+### `net/http` server
+```shell
+go get github.com/nijeti/healthcheck/servers/http
+```
+
+### `fasthttp` server
+```shell
+go get github.com/nijeti/healthcheck/servers/fasthttp
 ```
 
 ## Usage
 
-Here is an example of how to use the healthcheck library:
+Here is an example of how to use the healthcheck library with the standard HTTP server:
 
 ```go
 package main
 
 import (
 	"context"
-	"log"
-	"net/http"
+	"time"
 
 	"github.com/nijeti/healthcheck"
+	"github.com/nijeti/healthcheck/servers/http"
 )
 
 func main() {
 	// Create a new health checker
-	hc := healthcheck.New(
+	healthchecker := healthcheck.New(
 		healthcheck.WithSimpleProbe(
 			"database", func(ctx context.Context) error {
 				// Perform your health check
 				return nil
 			},
 		),
+		healthcheck.WithTimeoutDegraded(1*time.Second),
+		healthcheck.WithTimeoutUnhealthy(10*time.Second),
 	)
 
-	// Set up the HTTP handler for the health check endpoint
-	http.HandleFunc(
-		"/health", func(writer http.ResponseWriter, request *http.Request) {
-			// Check all registered probes
-			status := hc.Handle(request.Context())
-			
-			_, err := writer.Write([]byte(status.String()))
-			if err != nil {
-				log.Println("failed to write response:", err)
-			}
-		},
+	// Set up the HTTP server for health check endpoint 
+	healthcheckServer := http.New(
+		healthchecker,
+		http.WithAddress(":8080"),
+		http.WithRoute("/health"),
 	)
-
+	
 	// Start the server
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	healthcheckServer.Start()
+	defer healthcheckServer.Stop()
 }
+
 ```
 
 ## Examples

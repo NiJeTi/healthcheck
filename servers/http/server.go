@@ -43,12 +43,12 @@ func New(hc *healthcheck.Healthcheck, opts ...Option) *Server {
 	return s
 }
 
-// Serve starts the HTTP server to handle health check requests.
-func (s *Server) Serve() {
+// Start launches the HTTP server in a separate goroutine to handle health check requests.
+func (s *Server) Start() {
 	go func() {
 		err := s.server.ListenAndServe()
 		if err != nil {
-			s.logger.Error("failed to start healthcheck server", "error", err)
+			s.logger.Error("healthcheck server error", "error", err)
 		}
 	}()
 }
