@@ -10,13 +10,13 @@ type Probe interface {
 	Check(ctx context.Context) error
 }
 
-// SimpleProbe defines a function type for performing a health check.
-type SimpleProbe func(ctx context.Context) error
+// ProbeFunc defines a function type for performing a health check.
+type ProbeFunc func(ctx context.Context) error
 
-type simpleProbe struct {
-	check SimpleProbe
+type probe struct {
+	check ProbeFunc
 }
 
-func (p *simpleProbe) Check(ctx context.Context) error {
+func (p *probe) Check(ctx context.Context) error {
 	return p.check(ctx)
 }
