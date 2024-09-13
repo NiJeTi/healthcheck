@@ -3,7 +3,7 @@ with-expecter: true
 mockname: 'Mock{{.InterfaceName | camelcase}}'
 filename: '{{.InterfaceName | camelcase | firstLower}}.go'
 outpkg: '{{.PackageName}}'
-dir: 'internal/generated/mocks/{{replaceAll .PackagePath "github.com/nijeti/cinema-keeper/internal" ""}}'
+dir: 'internal/generated/mocks/{{replaceAll .PackagePath "github.com/nijeti/healthcheck" ""}}'
 packages:
   github.com/nijeti/healthcheck:
     config:
