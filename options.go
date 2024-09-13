@@ -40,12 +40,12 @@ func WithProbe(name string, probe Probe) Option {
 
 // WithSimpleProbe registers a simple health check probe under the specified name.
 // Panics if probe is nil or a probe with the same name already exists.
-func WithSimpleProbe(name string, probe SimpleProbe) Option {
-	if probe == nil {
+func WithSimpleProbe(name string, probeFunc ProbeFunc) Option {
+	if probeFunc == nil {
 		panic("healthcheck probe cannot be nil")
 	}
 
-	return WithProbe(name, &simpleProbe{check: probe})
+	return WithProbe(name, &probe{check: probeFunc})
 }
 
 // WithTimeoutDegraded sets the time after which a probe is considered degraded.
