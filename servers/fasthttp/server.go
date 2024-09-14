@@ -69,8 +69,8 @@ func (s *Server) handle(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	if ctx.IsGet() {
-		ctx.Error("not found", fasthttp.StatusMethodNotAllowed)
+	if !ctx.IsGet() {
+		ctx.Error("method not allowed", fasthttp.StatusMethodNotAllowed)
 		return
 	}
 

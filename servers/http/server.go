@@ -63,6 +63,13 @@ func (s *Server) Stop() {
 
 func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+
+		_, err := w.Write([]byte("method not allowed"))
+		if err != nil {
+			s.logger.Error("failed to write response", "error", err)
+		}
+
 		return
 	}
 
