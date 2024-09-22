@@ -2,6 +2,7 @@ package http
 
 import (
 	"log/slog"
+	"net"
 	"strings"
 
 	"github.com/nijeti/healthcheck"
@@ -22,6 +23,20 @@ func WithLogger(logger *slog.Logger) Option {
 	}
 }
 
+// WithListener sets a custom net.Listener for the Healthcheck server.
+// Panics if listener is empty
+func WithListener(listener net.Listener) Option {
+	if listener == nil {
+		panic("healthcheck server listener cannot be nil")
+	}
+
+	return func(s *Server) {
+		s.listen = func() (net.Listener, error) {
+			return listener, nil
+		}
+	}
+}
+
 // WithAddress sets the address for the Healthcheck server.
 // Panics if address is empty.
 func WithAddress(address string) Option {
@@ -30,7 +45,7 @@ func WithAddress(address string) Option {
 	}
 
 	return func(server *Server) {
-		server.address = address
+		server.listen = listen(address)
 	}
 }
 
