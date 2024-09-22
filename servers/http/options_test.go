@@ -2,6 +2,7 @@ package http
 
 import (
 	"log/slog"
+	"net"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,9 +27,29 @@ func TestWithLogger(t *testing.T) {
 	assert.Equal(t, logger, s.logger)
 }
 
-func TestWithAddress(t *testing.T) {
-	t.Parallel()
+func TestWithListener(t *testing.T) {
+	s := &Server{}
 
+	assert.PanicsWithValue(
+		t, "healthcheck server listener cannot be nil",
+		func() {
+			WithListener(nil)(s)
+		},
+	)
+
+	ln, err := net.Listen("tcp", "127.0.0.1:1337")
+	assert.NoError(t, err)
+	defer ln.Close()
+
+	WithListener(ln)(s)
+
+	gotLn, gotErr := s.listen()
+	assert.NoError(t, gotErr)
+
+	assert.Equal(t, ln, gotLn)
+}
+
+func TestWithAddress(t *testing.T) {
 	s := &Server{}
 
 	assert.PanicsWithValue(
@@ -38,9 +59,14 @@ func TestWithAddress(t *testing.T) {
 		},
 	)
 
-	address := "127.0.0.1:8080"
+	address := "127.0.0.1:1337"
 	WithAddress(address)(s)
-	assert.Equal(t, address, s.address)
+
+	ln, err := s.listen()
+	defer ln.Close()
+	
+	assert.NoError(t, err)
+	assert.Equal(t, address, ln.Addr().String())
 }
 
 func TestWithRoute(t *testing.T) {

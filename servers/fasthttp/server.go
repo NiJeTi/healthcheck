@@ -2,10 +2,16 @@ package fasthttp
 
 import (
 	"log/slog"
+	"net"
 
 	"github.com/valyala/fasthttp"
 
 	"github.com/nijeti/healthcheck"
+)
+
+const (
+	defaultAddr  = ":8080"
+	defaultRoute = "/health"
 )
 
 // Server represents an HTTP server
@@ -14,7 +20,7 @@ type Server struct {
 	hc                *healthcheck.Healthcheck
 	server            *fasthttp.Server
 	logger            *slog.Logger
-	address           string
+	listen            func() (net.Listener, error)
 	route             string
 	statusAdapterFunc func(status healthcheck.Status) (int, string)
 }
@@ -25,8 +31,8 @@ func New(hc *healthcheck.Healthcheck, opts ...Option) *Server {
 	s := &Server{
 		hc:                hc,
 		logger:            slog.Default(),
-		address:           ":8080",
-		route:             "/health",
+		listen:            listen(defaultAddr),
+		route:             defaultRoute,
 		statusAdapterFunc: defaultAdapter,
 	}
 
@@ -48,7 +54,15 @@ func New(hc *healthcheck.Healthcheck, opts ...Option) *Server {
 // Start launches the HTTP server in a separate goroutine to handle health check requests.
 func (s *Server) Start() {
 	go func() {
-		err := s.server.ListenAndServe(s.address)
+		ln, err := s.listen()
+		if err != nil {
+			s.logger.Error(
+				"failed to start healthcheck server listener", "error", err,
+			)
+			return
+		}
+
+		err = s.server.Serve(ln)
 		if err != nil {
 			s.logger.Error("healthcheck server error", "error", err)
 		}
@@ -83,6 +97,12 @@ func (s *Server) handle(ctx *fasthttp.RequestCtx) {
 
 func (s *Server) handleError(ctx *fasthttp.RequestCtx, err error) {
 	s.logger.ErrorContext(ctx, "healthcheck server error", "error", err)
+}
+
+func listen(addr string) func() (net.Listener, error) {
+	return func() (net.Listener, error) {
+		return net.Listen("tcp", addr)
+	}
 }
 
 func defaultAdapter(status healthcheck.Status) (int, string) {
