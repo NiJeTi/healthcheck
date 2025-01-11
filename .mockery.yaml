@@ -1,12 +1,12 @@
+all: true
 disable-version-string: true
 with-expecter: true
 mockname: 'Mock{{.InterfaceName | camelcase}}'
 filename: '{{.InterfaceName | camelcase | firstLower}}.go'
-outpkg: '{{.PackageName}}'
+outpkg: '{{.PackageName}}_test'
+issue-845-fix: true
 dir: 'internal/generated/mocks/{{replaceAll .PackagePath "github.com/nijeti/healthcheck" ""}}'
 packages:
   github.com/nijeti/healthcheck:
     config:
       recursive: true
-      include-regex: '.*'
-      exclude-regex: 'Option'

@@ -1,40 +1,52 @@
-package healthcheck
+package healthcheck_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/nijeti/healthcheck"
 )
 
 func TestStatus_Int(t *testing.T) {
-	assert.Equal(t, int(StatusHealthy), StatusHealthy.Int())
-	assert.Equal(t, int(StatusDegraded), StatusDegraded.Int())
-	assert.Equal(t, int(StatusUnhealthy), StatusUnhealthy.Int())
+	t.Parallel()
+
+	assert.Equal(
+		t, int(healthcheck.StatusHealthy), healthcheck.StatusHealthy.Int(),
+	)
+	assert.Equal(
+		t, int(healthcheck.StatusDegraded), healthcheck.StatusDegraded.Int(),
+	)
+	assert.Equal(
+		t, int(healthcheck.StatusUnhealthy), healthcheck.StatusUnhealthy.Int(),
+	)
 }
 
 func TestStatus_String(t *testing.T) {
+	t.Parallel()
+
 	tests := map[string]struct {
-		status Status
+		status healthcheck.Status
 		want   string
 	}{
 		"healthy": {
-			status: StatusHealthy,
+			status: healthcheck.StatusHealthy,
 			want:   "healthy",
 		},
 		"degraded": {
-			status: StatusDegraded,
+			status: healthcheck.StatusDegraded,
 			want:   "degraded",
 		},
 		"unhealthy": {
-			status: StatusUnhealthy,
+			status: healthcheck.StatusUnhealthy,
 			want:   "unhealthy",
 		},
 		"unknown": {
-			status: StatusUnknown,
+			status: healthcheck.StatusUnknown,
 			want:   "unknown",
 		},
 		"invalid": {
-			status: Status(-2),
+			status: healthcheck.Status(-2),
 			want:   "unknown",
 		},
 	}

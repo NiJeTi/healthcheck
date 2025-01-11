@@ -11,7 +11,8 @@ const (
 	// StatusHealthy represents a healthy status state in the system.
 	StatusHealthy = Status(iota)
 
-	// StatusDegraded represents a degraded status state in the system, indicating reduced functionality.
+	// StatusDegraded represents a degraded status state in the system,
+	// indicating reduced functionality.
 	StatusDegraded
 
 	// StatusUnhealthy represents an unhealthy status state in the system.

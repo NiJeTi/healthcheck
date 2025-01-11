@@ -24,7 +24,7 @@ func WithLogger(logger *slog.Logger) Option {
 }
 
 // WithListener sets a custom net.Listener for the Healthcheck server.
-// Panics if listener is empty
+// Panics if listener is empty.
 func WithListener(listener net.Listener) Option {
 	if listener == nil {
 		panic("healthcheck server listener cannot be nil")
@@ -61,10 +61,11 @@ func WithRoute(route string) Option {
 	}
 }
 
-// WithStatusAdapter sets a custom adapter function for converting healthcheck status.
+// WithStatusAdapter sets a custom adapter function
+// for converting healthcheck status.
 // Panics if adapterFunc is nil.
 func WithStatusAdapter(
-	adapterFunc func(status healthcheck.Status) (int, string),
+	adapterFunc func(status healthcheck.Status) (code int, message string),
 ) Option {
 	if adapterFunc == nil {
 		panic("healthcheck server status adapter func cannot be nil")

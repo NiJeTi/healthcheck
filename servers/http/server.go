@@ -4,13 +4,9 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/nijeti/healthcheck"
-)
-
-const (
-	defaultAddr  = ":8080"
-	defaultRoute = "/health"
 )
 
 // Server represents an HTTP server
@@ -23,6 +19,11 @@ type Server struct {
 	route             string
 	statusAdapterFunc func(status healthcheck.Status) (int, string)
 }
+
+const (
+	defaultAddr  = ":8080"
+	defaultRoute = "/health"
+)
 
 // New creates a new Server instance
 // operating provided Healthcheck instance and with the provided options.
@@ -43,12 +44,15 @@ func New(hc *healthcheck.Healthcheck, opts ...Option) *Server {
 	mux.HandleFunc(s.route, s.handle)
 	s.server = &http.Server{
 		Handler: mux,
+		//nolint:revive,mnd // time span
+		ReadHeaderTimeout: 100 * time.Millisecond,
 	}
 
 	return s
 }
 
-// Start launches the HTTP server in a separate goroutine to handle health check requests.
+// Start launches the HTTP server
+// in a separate goroutine to handle health check requests.
 func (s *Server) Start() {
 	go func() {
 		ln, err := s.listen()
@@ -105,9 +109,8 @@ func listen(addr string) func() (net.Listener, error) {
 	}
 }
 
-func defaultAdapter(status healthcheck.Status) (int, string) {
-	code := http.StatusInternalServerError
-	message := status.String()
+func defaultAdapter(status healthcheck.Status) (code int, message string) {
+	message = status.String()
 
 	switch status {
 	case healthcheck.StatusHealthy:
@@ -116,6 +119,8 @@ func defaultAdapter(status healthcheck.Status) (int, string) {
 		code = http.StatusOK
 	case healthcheck.StatusUnhealthy:
 		code = http.StatusServiceUnavailable
+	default:
+		code = http.StatusInternalServerError
 	}
 
 	return code, message

@@ -4,10 +4,26 @@ on:
   pull_request:
     branches:
       - 'main'
+    paths:
+      - 'servers/**'
+      - 'internal/**'
+      - '.golangci.yaml'
+      - '.mockery.yaml'
+      - '*.go'
+      - 'go.*'
+
+env:
+  GO_VERSION: '1.23'
+  LINTER_VERSION: 'v1.62'
+  
+  LINTER_CONFIG: './.golangci.yaml'
 
 jobs:
-  validate:
+  build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: 'Checkout'
@@ -16,13 +32,72 @@ jobs:
       - name: 'Setup Go'
         uses: actions/setup-go@v5
         with:
-          go-version: 1.23
+          go-version: ${{ env.GO_VERSION }}
 
-      - name: 'Install dependencies'
-        run: go mod download
+      - name: 'Build'
+        run: go build ./
 
-      - name: 'Vet'
-        run: go vet . ./servers/fasthttp ./servers/http
+  prelint:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+    
+    outputs:
+      modules: ${{ steps.set-modules.outputs.modules }}
+    
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v4
+
+      - name: 'Detect modules'
+        id: set-modules
+        run: echo "modules=$(go list -m -json | jq -s '.' | jq -c '[.[].Dir]')" >> $GITHUB_OUTPUT
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    needs: prelint
+    
+    permissions:
+      contents: read
+
+    strategy:
+      matrix: 
+        modules: ${{ fromJSON(needs.prelint.outputs.modules) }}
+    
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v4
+
+      - name: 'Run linters'
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: ${{ env.LINTER_VERSION }}
+          working-directory: ${{ matrix.modules }}
+          args: --timeout=2m --config=$GITHUB_WORKSPACE/.golangci.yaml
+
+  test:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+    
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v4
+
+      - name: 'Setup Go'
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
 
       - name: 'Test'
-        run: go test -v . ./servers/fasthttp ./servers/http
+        run: ./scripts/test.sh
+
+      - name: 'Upload coverage result'
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ github.token }}
+          file: coverage.out
+          format: golang
