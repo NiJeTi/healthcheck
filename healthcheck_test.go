@@ -1,4 +1,4 @@
-package healthcheck
+package healthcheck_test
 
 import (
 	"context"
@@ -11,7 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/nijeti/healthcheck/internal/generated/mocks"
+	"github.com/nijeti/healthcheck"
+	mocks "github.com/nijeti/healthcheck/internal/generated/mocks" //nolint:revive // path contains different packages
 )
 
 func TestNew(t *testing.T) {
@@ -21,9 +22,9 @@ func TestNew(t *testing.T) {
 		t,
 		"healthcheck degradation timeout must be less than unhealthy timeout",
 		func() {
-			New(
-				WithTimeoutDegraded(5*time.Second),
-				WithTimeoutUnhealthy(5*time.Second),
+			healthcheck.New(
+				healthcheck.WithTimeoutDegraded(5*time.Second),
+				healthcheck.WithTimeoutUnhealthy(5*time.Second),
 			)
 		},
 	)
@@ -32,16 +33,16 @@ func TestNew(t *testing.T) {
 		t,
 		"healthcheck degradation timeout must be less than unhealthy timeout",
 		func() {
-			New(
-				WithTimeoutDegraded(10*time.Second),
-				WithTimeoutUnhealthy(5*time.Second),
+			healthcheck.New(
+				healthcheck.WithTimeoutDegraded(10*time.Second),
+				healthcheck.WithTimeoutUnhealthy(5*time.Second),
 			)
 		},
 	)
 
 	assert.NotPanics(
 		t, func() {
-			New()
+			healthcheck.New()
 		},
 	)
 }
@@ -52,40 +53,42 @@ func TestHealthcheck_Handle(t *testing.T) {
 	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	tests := map[string]struct {
-		status Status
+		status healthcheck.Status
 		ctx    func() context.Context
-		setup  func(t *testing.T) *Healthcheck
+		setup  func(t *testing.T) *healthcheck.Healthcheck
 	}{
 		"no_probes": {
-			status: StatusUnknown,
-			setup: func(t *testing.T) *Healthcheck {
-				return New()
+			status: healthcheck.StatusUnknown,
+			setup: func(_ *testing.T) *healthcheck.Healthcheck {
+				return healthcheck.New()
 			},
 		},
 		"context_cancelled": {
-			status: StatusUnknown,
+			status: healthcheck.StatusUnknown,
 			ctx: func() context.Context {
 				ctx, cancel := context.WithCancel(context.Background())
 				cancel()
 				return ctx
 			},
-			setup: func(t *testing.T) *Healthcheck {
-				return New(WithProbe("probe", healthcheck.NewMockProbe(t)))
+			setup: func(t *testing.T) *healthcheck.Healthcheck {
+				return healthcheck.New(
+					healthcheck.WithProbe("probe", mocks.NewMockProbe(t)),
+				)
 			},
 		},
 		"one_probe_healthy": {
-			status: StatusHealthy,
-			setup: func(t *testing.T) *Healthcheck {
-				probe := healthcheck.NewMockProbe(t)
+			status: healthcheck.StatusHealthy,
+			setup: func(t *testing.T) *healthcheck.Healthcheck {
+				probe := mocks.NewMockProbe(t)
 				probe.EXPECT().Check(mock.Anything).Return(nil)
 
-				return New(WithProbe("probe", probe))
+				return healthcheck.New(healthcheck.WithProbe("probe", probe))
 			},
 		},
 		"one_probe_timeout_degraded": {
-			status: StatusDegraded,
-			setup: func(t *testing.T) *Healthcheck {
-				probe := healthcheck.NewMockProbe(t)
+			status: healthcheck.StatusDegraded,
+			setup: func(t *testing.T) *healthcheck.Healthcheck {
+				probe := mocks.NewMockProbe(t)
 				probe.EXPECT().Check(mock.Anything).RunAndReturn(
 					func(_ context.Context) error {
 						time.Sleep(20 * time.Millisecond)
@@ -93,16 +96,16 @@ func TestHealthcheck_Handle(t *testing.T) {
 					},
 				)
 
-				return New(
-					WithTimeoutDegraded(10*time.Millisecond),
-					WithProbe("probe", probe),
+				return healthcheck.New(
+					healthcheck.WithTimeoutDegraded(10*time.Millisecond),
+					healthcheck.WithProbe("probe", probe),
 				)
 			},
 		},
 		"one_probe_timeout_unhealthy": {
-			status: StatusUnhealthy,
-			setup: func(t *testing.T) *Healthcheck {
-				probe := healthcheck.NewMockProbe(t)
+			status: healthcheck.StatusUnhealthy,
+			setup: func(t *testing.T) *healthcheck.Healthcheck {
+				probe := mocks.NewMockProbe(t)
 				probe.EXPECT().Check(mock.Anything).RunAndReturn(
 					func(_ context.Context) error {
 						time.Sleep(30 * time.Millisecond)
@@ -110,52 +113,52 @@ func TestHealthcheck_Handle(t *testing.T) {
 					},
 				)
 
-				return New(
-					WithTimeoutDegraded(10*time.Millisecond),
-					WithTimeoutUnhealthy(20*time.Millisecond),
-					WithProbe("probe", probe),
+				return healthcheck.New(
+					healthcheck.WithTimeoutDegraded(10*time.Millisecond),
+					healthcheck.WithTimeoutUnhealthy(20*time.Millisecond),
+					healthcheck.WithProbe("probe", probe),
 				)
 			},
 		},
 		"one_probe_error": {
-			status: StatusUnhealthy,
-			setup: func(t *testing.T) *Healthcheck {
-				probe := healthcheck.NewMockProbe(t)
+			status: healthcheck.StatusUnhealthy,
+			setup: func(t *testing.T) *healthcheck.Healthcheck {
+				probe := mocks.NewMockProbe(t)
 				probe.EXPECT().Check(mock.Anything).Return(
 					errors.New("probe error"),
 				)
 
-				return New(WithProbe("probe", probe))
+				return healthcheck.New(healthcheck.WithProbe("probe", probe))
 			},
 		},
 		"one_probe_panic": {
-			status: StatusUnhealthy,
-			setup: func(t *testing.T) *Healthcheck {
-				probe := healthcheck.NewMockProbe(t)
+			status: healthcheck.StatusUnhealthy,
+			setup: func(t *testing.T) *healthcheck.Healthcheck {
+				probe := mocks.NewMockProbe(t)
 				probe.EXPECT().Check(mock.Anything).Panic("probe panic")
 
-				return New(WithProbe("probe", probe))
+				return healthcheck.New(healthcheck.WithProbe("probe", probe))
 			},
 		},
 		"multiple_probes_healthy": {
-			status: StatusHealthy,
-			setup: func(t *testing.T) *Healthcheck {
-				p1 := healthcheck.NewMockProbe(t)
-				p2 := healthcheck.NewMockProbe(t)
+			status: healthcheck.StatusHealthy,
+			setup: func(t *testing.T) *healthcheck.Healthcheck {
+				p1 := mocks.NewMockProbe(t)
+				p2 := mocks.NewMockProbe(t)
 				p1.EXPECT().Check(mock.Anything).Return(nil)
 				p2.EXPECT().Check(mock.Anything).Return(nil)
 
-				return New(
-					WithProbe("p1", p1),
-					WithProbe("p2", p2),
+				return healthcheck.New(
+					healthcheck.WithProbe("p1", p1),
+					healthcheck.WithProbe("p2", p2),
 				)
 			},
 		},
 		"multiple_probes_one_timeout_degraded": {
-			status: StatusDegraded,
-			setup: func(t *testing.T) *Healthcheck {
-				p1 := healthcheck.NewMockProbe(t)
-				p2 := healthcheck.NewMockProbe(t)
+			status: healthcheck.StatusDegraded,
+			setup: func(t *testing.T) *healthcheck.Healthcheck {
+				p1 := mocks.NewMockProbe(t)
+				p2 := mocks.NewMockProbe(t)
 				p1.EXPECT().Check(mock.Anything).RunAndReturn(
 					func(_ context.Context) error {
 						time.Sleep(20 * time.Millisecond)
@@ -164,18 +167,18 @@ func TestHealthcheck_Handle(t *testing.T) {
 				)
 				p2.EXPECT().Check(mock.Anything).Return(nil)
 
-				return New(
-					WithTimeoutDegraded(10*time.Millisecond),
-					WithProbe("p1", p1),
-					WithProbe("p2", p2),
+				return healthcheck.New(
+					healthcheck.WithTimeoutDegraded(10*time.Millisecond),
+					healthcheck.WithProbe("p1", p1),
+					healthcheck.WithProbe("p2", p2),
 				)
 			},
 		},
 		"multiple_probes_one_timeout_unhealthy": {
-			status: StatusUnhealthy,
-			setup: func(t *testing.T) *Healthcheck {
-				p1 := healthcheck.NewMockProbe(t)
-				p2 := healthcheck.NewMockProbe(t)
+			status: healthcheck.StatusUnhealthy,
+			setup: func(t *testing.T) *healthcheck.Healthcheck {
+				p1 := mocks.NewMockProbe(t)
+				p2 := mocks.NewMockProbe(t)
 				p1.EXPECT().Check(mock.Anything).RunAndReturn(
 					func(_ context.Context) error {
 						time.Sleep(30 * time.Millisecond)
@@ -184,39 +187,35 @@ func TestHealthcheck_Handle(t *testing.T) {
 				)
 				p2.EXPECT().Check(mock.Anything).Return(nil)
 
-				return New(
-					WithTimeoutDegraded(10*time.Millisecond),
-					WithTimeoutUnhealthy(20*time.Millisecond),
-					WithProbe("p1", p1),
-					WithProbe("p2", p2),
+				return healthcheck.New(
+					healthcheck.WithTimeoutDegraded(10*time.Millisecond),
+					healthcheck.WithTimeoutUnhealthy(20*time.Millisecond),
+					healthcheck.WithProbe("p1", p1),
+					healthcheck.WithProbe("p2", p2),
 				)
 			},
 		},
 		"multiple_probes_one_error": {
-			status: StatusUnhealthy,
-			setup: func(t *testing.T) *Healthcheck {
-				p1 := healthcheck.NewMockProbe(t)
-				p2 := healthcheck.NewMockProbe(t)
+			status: healthcheck.StatusUnhealthy,
+			setup: func(t *testing.T) *healthcheck.Healthcheck {
+				p1 := mocks.NewMockProbe(t)
+				p2 := mocks.NewMockProbe(t)
 				p1.EXPECT().Check(mock.Anything).Return(
 					errors.New("p1 error"),
 				)
 				p2.EXPECT().Check(mock.Anything).Return(nil)
 
-				return New(
-					WithProbe("p1", p1),
-					WithProbe("p2", p2),
+				return healthcheck.New(
+					healthcheck.WithProbe("p1", p1),
+					healthcheck.WithProbe("p2", p2),
 				)
 			},
 		},
 	}
 
 	for name, tt := range tests {
-		name := name
-		tt := tt
-
 		t.Run(
 			name, func(t *testing.T) {
-				t.Parallel()
 				hc := tt.setup(t)
 
 				ctx := context.Background()

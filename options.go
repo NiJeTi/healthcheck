@@ -38,7 +38,8 @@ func WithProbe(name string, probe Probe) Option {
 	}
 }
 
-// WithSimpleProbe registers a simple health check probe under the specified name.
+// WithSimpleProbe registers a simple health check probe
+// under the specified name.
 // Panics if probe is nil or a probe with the same name already exists.
 func WithSimpleProbe(name string, probeFunc ProbeFunc) Option {
 	if probeFunc == nil {
@@ -60,7 +61,8 @@ func WithTimeoutDegraded(timeout time.Duration) Option {
 	}
 }
 
-// WithTimeoutUnhealthy sets the time after which a probe is considered unhealthy.
+// WithTimeoutUnhealthy sets the time
+// after which a probe is considered unhealthy.
 // Panics if timeout is less than or equal to 0.
 func WithTimeoutUnhealthy(timeout time.Duration) Option {
 	if timeout <= 0 {

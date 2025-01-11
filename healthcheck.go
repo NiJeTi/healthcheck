@@ -7,7 +7,8 @@ import (
 	"time"
 )
 
-// Healthcheck represents an application health checker with configurable probes and timeouts.
+// Healthcheck represents an application health checker
+// with configurable probes and timeouts.
 type Healthcheck struct {
 	logger           *slog.Logger
 	probes           map[string]Probe
@@ -15,13 +16,18 @@ type Healthcheck struct {
 	timeoutUnhealthy time.Duration
 }
 
+const (
+	TimeoutDegradedDefault  = 1 * time.Second
+	TimeoutUnhealthyDefault = 10 * time.Second
+)
+
 // New creates a new Healthcheck instance with the provided options.
 func New(opts ...Option) *Healthcheck {
 	hc := &Healthcheck{
 		logger:           slog.Default(),
-		probes:           map[string]Probe{},
-		timeoutDegraded:  1 * time.Second,
-		timeoutUnhealthy: 10 * time.Second,
+		probes:           make(map[string]Probe),
+		timeoutDegraded:  TimeoutDegradedDefault,
+		timeoutUnhealthy: TimeoutUnhealthyDefault,
 	}
 
 	for _, opt := range opts {
@@ -52,7 +58,7 @@ func (hc *Healthcheck) Handle(ctx context.Context) Status {
 
 	for name, probe := range hc.probes {
 		pl := hc.logger.With("probe", name)
-		go hc.probeCheck(pl, ctx, wg, statuses, probe)
+		go hc.probeCheck(ctx, pl, wg, statuses, probe)
 	}
 
 	wg.Wait()
@@ -62,8 +68,8 @@ func (hc *Healthcheck) Handle(ctx context.Context) Status {
 }
 
 func (hc *Healthcheck) probeCheck(
-	logger *slog.Logger,
 	ctx context.Context,
+	logger *slog.Logger,
 	wg *sync.WaitGroup,
 	statuses chan Status,
 	probe Probe,
@@ -115,7 +121,7 @@ func (hc *Healthcheck) probeCheck(
 	statuses <- StatusHealthy
 }
 
-func (hc *Healthcheck) calculateStatus(statuses chan Status) Status {
+func (*Healthcheck) calculateStatus(statuses chan Status) Status {
 	status := StatusHealthy
 	for s := range statuses {
 		if s <= status {
