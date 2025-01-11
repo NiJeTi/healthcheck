@@ -5,6 +5,7 @@ on:
     branches:
       - 'main'
     paths:
+      - '.github/**'
       - 'servers/**'
       - 'internal/**'
       - '.golangci.yaml'
@@ -15,8 +16,6 @@ on:
 env:
   GO_VERSION: '1.23'
   LINTER_VERSION: 'v1.62'
-  
-  LINTER_CONFIG: './.golangci.yaml'
 
 jobs:
   build:
