@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/NiJeTi/healthcheck/badge.svg)](https://coveralls.io/github/NiJeTi/healthcheck)
+
 # Healthcheck
 
 Go package `healthcheck` provides a simple yet very convenient application health checking tools.
