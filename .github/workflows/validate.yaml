@@ -16,6 +16,9 @@ on:
 env:
   GO_VERSION: '1.23'
   LINTER_VERSION: 'v1.62'
+  
+  HTTP_SERVER: './servers/http/'
+  FASTHTTP_SERVER: './servers/fasthttp/'
 
 jobs:
   build:
@@ -33,8 +36,14 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: 'Build'
+      - name: 'Build package'
         run: go build ./
+        
+      - name: 'Build http server'
+        run: go build ${{ env.HTTP_SERVER }}
+
+      - name: 'Build fasthttp server'
+        run: go build ${{ env.FASTHTTP_SERVER }}
 
   prelint:
     runs-on: ubuntu-latest
