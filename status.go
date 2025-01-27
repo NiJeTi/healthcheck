@@ -7,7 +7,6 @@ type Status int
 const StatusUnknown Status = -1
 
 const (
-
 	// StatusHealthy represents a healthy status state in the system.
 	StatusHealthy = Status(iota)
 

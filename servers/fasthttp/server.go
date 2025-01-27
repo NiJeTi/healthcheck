@@ -2,6 +2,7 @@
 package fasthttp
 
 import (
+	"context"
 	"log/slog"
 	"net"
 
@@ -73,7 +74,7 @@ func (s *Server) Start() {
 
 // Stop gracefully shuts down the HTTP server.
 func (s *Server) Stop() {
-	err := s.server.Shutdown()
+	err := s.server.ShutdownWithContext(context.Background())
 	if err != nil {
 		s.logger.Error("failed to stop healthcheck server", "error", err)
 	}

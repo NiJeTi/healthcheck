@@ -1,6 +1,8 @@
 package http
 
 import (
+	"context"
+	"errors"
 	"log/slog"
 	"net"
 	"net/http"
@@ -64,7 +66,7 @@ func (s *Server) Start() {
 		}
 
 		err = s.server.Serve(ln)
-		if err != nil {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			s.logger.Error("healthcheck server error", "error", err)
 		}
 	}()
@@ -72,7 +74,7 @@ func (s *Server) Start() {
 
 // Stop gracefully shuts down the HTTP server.
 func (s *Server) Stop() {
-	err := s.server.Close()
+	err := s.server.Shutdown(context.Background())
 	if err != nil {
 		s.logger.Error("failed to stop healthcheck server", "error", err)
 	}
