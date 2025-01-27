@@ -56,9 +56,8 @@ func (hc *Healthcheck) Handle(ctx context.Context) Status {
 
 	statuses := make(chan Status, probeCount)
 
-	for name, probe := range hc.probes {
-		pl := hc.logger.With("probe", name)
-		go hc.probeCheck(ctx, pl, wg, statuses, probe)
+	for name, p := range hc.probes {
+		go hc.check(ctx, wg, statuses, p, name)
 	}
 
 	wg.Wait()
@@ -67,13 +66,15 @@ func (hc *Healthcheck) Handle(ctx context.Context) Status {
 	return hc.calculateStatus(statuses)
 }
 
-func (hc *Healthcheck) probeCheck(
+func (hc *Healthcheck) check(
 	ctx context.Context,
-	logger *slog.Logger,
 	wg *sync.WaitGroup,
 	statuses chan Status,
 	probe Probe,
+	probeName string,
 ) {
+	logger := hc.logger.With("probe", probeName)
+
 	defer wg.Done()
 
 	defer func() {
