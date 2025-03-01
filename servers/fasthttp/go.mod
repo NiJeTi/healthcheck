@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/nijeti/healthcheck v1.0.0-beta.2
-	github.com/valyala/fasthttp v1.58.0
+	github.com/valyala/fasthttp v1.59.0
 )
 
 require (
