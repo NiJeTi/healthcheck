@@ -3,6 +3,7 @@ package fasthttp
 
 import (
 	"context"
+	"io"
 	"log/slog"
 	"net"
 
@@ -32,7 +33,7 @@ const (
 func New(hc *healthcheck.Healthcheck, opts ...Option) *Server {
 	s := &Server{
 		hc:                hc,
-		logger:            slog.Default(),
+		logger:            slog.New(slog.NewTextHandler(io.Discard, nil)),
 		listen:            listen(defaultAddr),
 		route:             defaultRoute,
 		statusAdapterFunc: defaultAdapter,

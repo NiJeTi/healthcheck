@@ -2,6 +2,7 @@ package healthcheck_test
 
 import (
 	"context"
+	"io"
 	"log/slog"
 	"testing"
 
@@ -25,7 +26,9 @@ func TestWithLogger(t *testing.T) {
 	assert.NotPanics(
 		t, func() {
 			healthcheck.New(
-				healthcheck.WithLogger(slog.Default()),
+				healthcheck.WithLogger(
+					slog.New(slog.NewTextHandler(io.Discard, nil)),
+				),
 			)
 		},
 	)

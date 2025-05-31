@@ -2,6 +2,7 @@ package healthcheck
 
 import (
 	"context"
+	"io"
 	"log/slog"
 	"sync"
 	"time"
@@ -24,7 +25,7 @@ const (
 // New creates a new Healthcheck instance with the provided options.
 func New(opts ...Option) *Healthcheck {
 	hc := &Healthcheck{
-		logger:           slog.Default(),
+		logger:           slog.New(slog.NewTextHandler(io.Discard, nil)),
 		probes:           make(map[string]Probe),
 		timeoutDegraded:  TimeoutDegradedDefault,
 		timeoutUnhealthy: TimeoutUnhealthyDefault,
