@@ -1,23 +1,30 @@
-MOCKERY_VERSION=github.com/vektra/mockery/v2@v2.50
-GOLANGCI_LINT_IMAGE=golangci/golangci-lint:v1.63-alpine
+# cannot be migrated to go tool
+# reason: https://golangci-lint.run/welcome/install/#install-from-sources
+GOLANGCI_LINT_IMAGE=golangci/golangci-lint:v2.2-alpine
 
 .PHONY: deps
 deps:
-	go install $(MOCKERY_VERSION)
 	docker pull $(GOLANGCI_LINT_IMAGE)
 
 .PHONY: mocks
 mocks:
+	rm -rf ./internal/generated/mocks
+	mkdir -p ./internal/generated/mocks
+
+	go tool mockery
+
+.PHONY: fmt
+fmt:
 	$(MAKE) deps
 
-	rm -rf ./internal/generated/mocks
-	mockery
+	docker run -t --rm -v $(PWD):/src -w /src $(GOLANGCI_LINT_IMAGE) \
+		golangci-lint fmt
 
 .PHONY: lint
 lint:
 	$(MAKE) deps
 
-	./scripts/lint.sh $(GOLANGCI_LINT_IMAGE)
+	docker run -t --rm -v $(PWD):/src -w /src $(GOLANGCI_LINT_IMAGE) golangci-lint run
 
 .PHONY: test
 test:

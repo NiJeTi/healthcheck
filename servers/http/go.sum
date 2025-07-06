@@ -1,7 +1,5 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/nijeti/healthcheck v1.0.0-beta.2 h1:99dRxvH5rSj7mseQgb4e9nt/PGuAwVeMJW40RTmFWTc=
-github.com/nijeti/healthcheck v1.0.0-beta.2/go.mod h1:YOvJznQqQ7qUbHOJhjS/gNMxEWyBkgsNeYWxLViOi70=
 github.com/nijeti/healthcheck v1.0.0-beta.3 h1:ZGiWOCw8su5Dti42WKrZgcaaxlqEZcpW0A3sFnK1QwM=
 github.com/nijeti/healthcheck v1.0.0-beta.3/go.mod h1:NmxMN14bsHp3m/rolIxI/t+Z9g/0TE8BiD8qz/1qVb4=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

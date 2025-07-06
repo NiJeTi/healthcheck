@@ -1,11 +1,15 @@
 all: true
-disable-version-string: true
-with-expecter: true
-mockname: 'Mock{{.InterfaceName | camelcase}}'
-filename: '{{.InterfaceName | camelcase | firstLower}}.go'
-outpkg: '{{.PackageName}}_test'
-issue-845-fix: true
-dir: 'internal/generated/mocks/{{replaceAll .PackagePath "github.com/nijeti/healthcheck" ""}}'
+dir: 'internal/generated/mocks/{{replaceAll "github.com/nijeti/healthcheck" "" .SrcPackagePath}}'
+filename: "{{.InterfaceName | camelcase | firstLower}}.go"
+force-file-write: true
+formatter: goimports
+log-level: info
+structname: "Mock{{.InterfaceName | camelcase | firstUpper}}"
+pkgname: '{{.SrcPackageName}}'
+recursive: false
+require-template-schema-exists: true
+template: testify
+template-schema: '{{.Template}}.schema.json'
 packages:
   github.com/nijeti/healthcheck:
     config:
