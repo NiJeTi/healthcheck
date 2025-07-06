@@ -1,8 +1,6 @@
 module github.com/nijeti/healthcheck/servers/fasthttp
 
-go 1.23.0
-
-toolchain go1.24.1
+go 1.24
 
 require (
 	github.com/nijeti/healthcheck v1.0.0-beta.3

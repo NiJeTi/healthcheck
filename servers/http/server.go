@@ -115,15 +115,9 @@ func listen(addr string) func() (net.Listener, error) {
 func defaultAdapter(status healthcheck.Status) (code int, message string) {
 	message = status.String()
 
-	switch status {
-	case healthcheck.StatusHealthy:
-		code = http.StatusOK
-	case healthcheck.StatusDegraded:
-		code = http.StatusOK
-	case healthcheck.StatusUnhealthy:
+	code = http.StatusOK
+	if status > healthcheck.StatusHealthy {
 		code = http.StatusServiceUnavailable
-	default:
-		code = http.StatusInternalServerError
 	}
 
 	return code, message

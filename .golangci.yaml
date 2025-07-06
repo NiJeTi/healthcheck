@@ -1,16 +1,15 @@
+version: "2"
 linters:
-  disable-all: true
+  default: none
   enable:
     - asciicheck
     - bidichk
     - copyloopvar
-    - decorder
     - dupl
     - errcheck
     - errname
     - errorlint
     - exhaustive
-    - gci
     - gocheckcompilerdirectives
     - gochecknoglobals
     - gochecknoinits
@@ -18,11 +17,7 @@ linters:
     - gocritic
     - gocyclo
     - godot
-    - gofmt
-    - gofumpt
-    - goimports
     - gosec
-    - gosimple
     - govet
     - inamedparam
     - ineffassign
@@ -32,16 +27,15 @@ linters:
     - makezero
     - mnd
     - nilerr
+    - nilnesserr
     - nilnil
     - nolintlint
     - paralleltest
-    # - prealloc # premature optimization
     - revive
     - rowserrcheck
     - sloglint
     - sqlclosecheck
     - staticcheck
-    - stylecheck
     - tagalign
     - tagliatelle
     - testifylint
@@ -53,145 +47,174 @@ linters:
     - wastedassign
     - whitespace
     - wrapcheck
-
-linters-settings:
-  copyloopvar:
-    check-alias: true
-  decorder:
-    disable-dec-order-check: false
-  dupl:
-    threshold: 100
-  errcheck:
-    check-type-assertions: true
-  exhaustive:
-    default-signifies-exhaustive: true
-    default-case-required: true
-  gci:
-    sections:
-      - standard
-      - default
-      - localmodule
-    custom-order: true
-  gocognit:
-    min-complexity: 20
-  gocritic:
-    enable-all: true
-    disabled-checks:
-      - deferInLoop
-      - hugeParam
-      - paramTypeCombine
-      - tooManyResultsChecker
-  gocyclo:
-    min-complexity: 20
-  gofmt:
-    rewrite-rules:
-      - pattern: "interface{}"
-        replacement: "any"
-  gosimple:
-    checks: [ "all" ]
-  govet:
-    enable-all: true
-    disable:
-      - fieldalignment # premature optimization
-      - shadow
-  ireturn:
-    reject:
-      - anon
-  lll:
-    line-length: 80
-  nilnil:
-    detect-opposite: true
-  nolintlint:
-    require-explanation: true
-    require-specific: true
-  paralleltest:
-    ignore-missing-subtests: true
-  revive:
-    enable-all-rules: true
-    rules:
-      - name: add-constant
-        arguments:
-          - maxLitCount: "4"
-            allowStrs: "\"\""
-            allowInts: "-1,0,1,2"
-            allowFloats: "-1.0,-1.,0.0,0.,1.0,1.,2.0,2."
-            ignoreFuncs: "os\\.*,fmt\\.Println,make,logger\\.*"
-      - name: argument-limit
-        disabled: true
-      - name: banned-characters
-        disabled: true
-      - name: bare-return
-        disabled: true
-      - name: cognitive-complexity
-        arguments: [ 20 ]
-      - name: comments-density
-        disabled: true
-      - name: cyclomatic
-        arguments: [ 20 ]
-      - name: enforce-map-style
-        disabled: true
-      - name: enforce-repeated-arg-type-style
-        disabled: true
-      - name: enforce-slice-style
-        disabled: true
-      - name: file-header
-        disabled: true
-      - name: file-length-limit
-        disabled: true
-      - name: filename-format
-        disabled: true
-      - name: function-length
-        disabled: true
-      - name: function-result-limit
-        arguments: [ 3 ]
-      - name: import-alias-naming
-        arguments:
-          - "^[a-zA-Z][a-zA-Z0-9]{0,}$"
-      - name: imports-blocklist
-        disabled: true
-      - name: line-length-limit
-        disabled: true
-      - name: max-control-nesting
-        disabled: true
-      - name: max-public-structs
-        disabled: true
-      - name: nested-structs
-        disabled: true
-      - name: range
-        disabled: true
-      - name: string-format
-        disabled: true
-      - name: unchecked-type-assertion
-        disabled: true
-      - name: var-naming
-        arguments:
-          - [ ]
-          - [ ]
-          - - skipPackageNameChecks: true
-  sloglint:
-    no-global: default
-    context: scope
-    static-msg: true
-    key-naming-case: snake
-  staticcheck:
-    checks: [ "all", "-S1008" ]
-  stylecheck:
-    checks: [ "all", "-ST1003" ]
-  tagliatelle:
-    case:
-      use-field-name: true
+  settings:
+    copyloopvar:
+      check-alias: true
+    dupl:
+      threshold: 100
+    errcheck:
+      check-type-assertions: true
+    exhaustive:
+      default-signifies-exhaustive: true
+      default-case-required: true
+    gocognit:
+      min-complexity: 20
+    gocritic:
+      enable-all: true
+      disabled-checks:
+        - deferInLoop
+        - hugeParam
+        - paramTypeCombine
+        - tooManyResultsChecker
+    gocyclo:
+      min-complexity: 20
+    govet:
+      disable:
+        - fieldalignment
+        - shadow
+      enable-all: true
+    ireturn:
+      reject:
+        - anon
+    lll:
+      line-length: 80
+    nilnil:
+      detect-opposite: true
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+    paralleltest:
+      ignore-missing-subtests: true
+    revive:
+      enable-all-rules: true
       rules:
-        json: snake
-        yaml: kebab
-  testifylint:
-    enable-all: true
-    disable:
-      - require-error
-
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - dupl
-    - path: _test\.go
-      text: "add-constant:"
+        - name: add-constant
+          arguments:
+            - allowFloats: -1.0,-1.,0.0,0.,1.0,1.,2.0,2.
+              allowInts: -1,0,1,2
+              allowStrs: '""'
+              ignoreFuncs: os\.*,fmt\.Println,logger\.*,strconv\.*
+              maxLitCount: "4"
+        - name: argument-limit
+          disabled: true
+        - name: banned-characters
+          disabled: true
+        - name: bare-return
+          disabled: true
+        - name: cognitive-complexity
+          arguments:
+            - 20
+        - name: comments-density
+          disabled: true
+        - name: cyclomatic
+          arguments:
+            - 20
+        - name: enforce-map-style
+          disabled: true
+        - name: enforce-repeated-arg-type-style
+          disabled: true
+        - name: enforce-slice-style
+          disabled: true
+        - name: file-header
+          disabled: true
+        - name: file-length-limit
+          disabled: true
+        - name: filename-format
+          disabled: true
+        - name: function-length
+          disabled: true
+        - name: function-result-limit
+          arguments:
+            - 3
+        - name: import-alias-naming
+          arguments:
+            - ^[a-zA-Z][a-zA-Z0-9]{0,}$
+        - name: imports-blocklist
+          disabled: true
+        - name: line-length-limit
+          disabled: true
+        - name: max-control-nesting
+          disabled: true
+        - name: max-public-structs
+          disabled: true
+        - name: nested-structs
+          disabled: true
+        - name: range
+          disabled: true
+        - name: string-format
+          disabled: true
+        - name: struct-tag
+          arguments:
+            - validate,datetime
+        - name: unchecked-type-assertion
+          disabled: true
+        - name: var-naming
+          arguments:
+            - []
+            - []
+            - - skipPackageNameChecks: true
+    sloglint:
+      no-global: default
+      context: scope
+      static-msg: true
+      key-naming-case: snake
+    staticcheck:
+      checks:
+        - all
+        - -S1008
+        - -ST1003
+    tagalign:
+      align: false
+    tagliatelle:
+      case:
+        rules:
+          json: snake
+          yaml: snake
+        use-field-name: true
+    testifylint:
+      enable-all: true
+      disable:
+        - require-error
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - path: _test\.go
+        linters:
+          - dupl
+      - path: _test\.go
+        text: 'add-constant:'
+      - path: internal/api
+        linters:
+          - wrapcheck
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - localmodule
+      custom-order: true
+    gofmt:
+      rewrite-rules:
+        - pattern: interface{}
+          replacement: any
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
