@@ -2,7 +2,7 @@
 
 # Healthcheck
 
-Go package `healthcheck` provides a simple yet very convenient application health checking tools.
+Go package `healthcheck` provides simple yet very convenient application health checking tools.
 
 ## Features
 
@@ -74,7 +74,7 @@ func main() {
 
 ## Examples
 
-The following projects has successfully integrated Healthcheck:
+The following projects have successfully integrated Healthcheck:
 
 - [cinema-keeper](https://github.com/NiJeTi/cinema-keeper)
 

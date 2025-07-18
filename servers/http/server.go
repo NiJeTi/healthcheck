@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net"
@@ -54,31 +55,60 @@ func New(hc *healthcheck.Healthcheck, opts ...Option) *Server {
 	return s
 }
 
-// Start launches the HTTP server
-// in a separate goroutine to handle health check requests.
+// Start launches the server in a separate goroutine.
+// Logs an error if the server fails to start or encounters an issue.
 func (s *Server) Start() {
 	go func() {
-		ln, err := s.listen()
-		if err != nil {
-			s.logger.Error(
-				"failed to start healthcheck server listener", "error", err,
-			)
-			return
-		}
-
-		err = s.server.Serve(ln)
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := s.Serve(); err != nil {
 			s.logger.Error("healthcheck server error", "error", err)
+			return
 		}
 	}()
 }
 
-// Stop gracefully shuts down the HTTP server.
-func (s *Server) Stop() {
-	err := s.server.Shutdown(context.Background())
+// Serve launches the server in the same goroutine.
+// Returns an error if the server fails to start or encounters an issue.
+func (s *Server) Serve() error {
+	ln, err := s.listen()
 	if err != nil {
+		return fmt.Errorf(
+			"failed to start healthcheck server listener: %w", err,
+		)
+	}
+
+	err = s.server.Serve(ln)
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		return fmt.Errorf("healthcheck server error: %w", err)
+	}
+
+	return nil
+}
+
+// Stop gracefully shuts down the server.
+// Logs an error if the server shutdown process fails.
+func (s *Server) Stop() {
+	if err := s.StopWithContext(context.Background()); err != nil {
 		s.logger.Error("failed to stop healthcheck server", "error", err)
 	}
+}
+
+// StopWithTimeout gracefully shuts down the server with a provided timeout.
+// Returns an error if the server shutdown process fails.
+func (s *Server) StopWithTimeout(timeout time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	return s.StopWithContext(ctx)
+}
+
+// StopWithContext gracefully shuts down the server using the provided context.
+// Returns an error if the server shutdown process fails.
+func (s *Server) StopWithContext(ctx context.Context) error {
+	if err := s.server.Shutdown(ctx); err != nil {
+		return fmt.Errorf("failed to stop healthcheck server: %w", err)
+	}
+
+	return nil
 }
 
 func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
