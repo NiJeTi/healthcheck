@@ -92,9 +92,9 @@ linters:
           arguments:
             - allowFloats: -1.0,-1.,0.0,0.,1.0,1.,2.0,2.
               allowInts: -1,0,1,2
-              allowStrs: '""'
+              allowStrs: '"","/"'
               ignoreFuncs: os\.*,fmt\.Println,logger\.*,strconv\.*
-              maxLitCount: "4"
+              maxLitCount: '4'
         - name: argument-limit
           disabled: true
         - name: banned-characters
@@ -145,9 +145,16 @@ linters:
           disabled: true
         - name: struct-tag
           arguments:
-            - validate,datetime
+            - validate,omitempty
+            - validate,datetime,dateonly,timeonly
         - name: unchecked-type-assertion
           disabled: true
+        - name: unhandled-error
+          arguments:
+            - '^os\.(CreateTemp|WriteFile|Chmod)$'
+            - '^fmt\.(Print|Fprintf)'
+            - '^net\.'
+            - '^(bytes\.Buffer|string\.Writer|strings\.Builder)\.Write(Byte|Rune|String)?$'
         - name: var-naming
           arguments:
             - []
@@ -191,6 +198,7 @@ linters:
       - path: internal/api
         linters:
           - wrapcheck
+          - dupl
     paths:
       - third_party$
       - builtin$
@@ -218,3 +226,5 @@ formatters:
       - third_party$
       - builtin$
       - examples$
+issues:
+  fix: true
