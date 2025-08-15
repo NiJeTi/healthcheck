@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 
@@ -11,5 +11,5 @@ for mod in $modules; do
   
   docker run -t --rm \
     -v "$mod":/src -v ./.golangci.yaml:/src/.golangci.yaml\
-    -w /src "$GOLANGCI_LINT_IMAGE" golangci-lint run
+    -w /src "$GOLANGCI_LINT_IMAGE" golangci-lint run --fix
 done
