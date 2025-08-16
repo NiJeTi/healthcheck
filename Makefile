@@ -15,9 +15,7 @@ mocks:
 
 .PHONY: lint
 lint:
-	$(MAKE) deps
-
-	./scripts/lint.sh $(GOLANGCI_LINT_IMAGE)
+	./scripts/lint.sh
 
 .PHONY: test
 test:
