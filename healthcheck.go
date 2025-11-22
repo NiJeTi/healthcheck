@@ -67,6 +67,10 @@ func (hc *Healthcheck) Handle(ctx context.Context) Status {
 	return hc.calculateStatus(statuses)
 }
 
+func (hc *Healthcheck) Logger() *slog.Logger {
+	return hc.logger
+}
+
 func (hc *Healthcheck) check(
 	ctx context.Context,
 	wg *sync.WaitGroup,

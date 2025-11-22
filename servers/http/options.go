@@ -1,7 +1,6 @@
 package http
 
 import (
-	"log/slog"
 	"net"
 	"strings"
 
@@ -10,18 +9,6 @@ import (
 
 // Option configures a Healthcheck server instance.
 type Option func(server *Server)
-
-// WithLogger sets the logger for the Healthcheck server.
-// Panics if logger is nil.
-func WithLogger(logger *slog.Logger) Option {
-	if logger == nil {
-		panic("healthcheck server logger cannot be nil")
-	}
-
-	return func(s *Server) {
-		s.logger = logger
-	}
-}
 
 // WithListener sets a custom net.Listener for the Healthcheck server.
 // Panics if listener is empty.
