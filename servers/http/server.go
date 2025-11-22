@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
-	"log/slog"
 	"net"
 	"net/http"
 	"time"
@@ -18,7 +16,6 @@ import (
 type Server struct {
 	hc                *healthcheck.Healthcheck
 	server            *http.Server
-	logger            *slog.Logger
 	listen            func() (net.Listener, error)
 	route             string
 	statusAdapterFunc func(status healthcheck.Status) (int, string)
@@ -34,7 +31,6 @@ const (
 func New(hc *healthcheck.Healthcheck, opts ...Option) *Server {
 	s := &Server{
 		hc:                hc,
-		logger:            slog.New(slog.NewTextHandler(io.Discard, nil)),
 		listen:            listen(defaultAddr),
 		route:             defaultRoute,
 		statusAdapterFunc: defaultAdapter,
@@ -60,7 +56,7 @@ func New(hc *healthcheck.Healthcheck, opts ...Option) *Server {
 func (s *Server) Start() {
 	go func() {
 		if err := s.Serve(); err != nil {
-			s.logger.Error("healthcheck server error", "error", err)
+			s.hc.Logger().Error("healthcheck server error", "error", err)
 			return
 		}
 	}()
@@ -88,7 +84,7 @@ func (s *Server) Serve() error {
 // Logs an error if the server shutdown process fails.
 func (s *Server) Stop() {
 	if err := s.StopWithContext(context.Background()); err != nil {
-		s.logger.Error("failed to stop healthcheck server", "error", err)
+		s.hc.Logger().Error("failed to stop healthcheck server", "error", err)
 	}
 }
 
@@ -117,7 +113,7 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 
 		_, err := w.Write([]byte("method not allowed"))
 		if err != nil {
-			s.logger.Error("failed to write response", "error", err)
+			s.hc.Logger().Error("failed to write response", "error", err)
 		}
 
 		return
@@ -132,7 +128,9 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 
 	_, err := w.Write([]byte(message))
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to write response", "error", err)
+		s.hc.Logger().ErrorContext(
+			ctx, "failed to write response", "error", err,
+		)
 	}
 }
 
@@ -140,15 +138,4 @@ func listen(addr string) func() (net.Listener, error) {
 	return func() (net.Listener, error) {
 		return net.Listen("tcp", addr)
 	}
-}
-
-func defaultAdapter(status healthcheck.Status) (code int, message string) {
-	message = status.String()
-
-	code = http.StatusOK
-	if status > healthcheck.StatusHealthy {
-		code = http.StatusServiceUnavailable
-	}
-
-	return code, message
 }
