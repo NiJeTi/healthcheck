@@ -6,7 +6,7 @@ import (
 	"github.com/nijeti/healthcheck"
 )
 
-func Handle(hc healthcheck.Healthcheck) http.HandlerFunc {
+func Handle(hc *healthcheck.Healthcheck) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.WriteHeader(http.StatusMethodNotAllowed)
