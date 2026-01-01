@@ -3,7 +3,7 @@ module github.com/nijeti/healthcheck/servers/fasthttp
 go 1.25
 
 require (
-	github.com/nijeti/healthcheck v1.1.0
+	github.com/nijeti/healthcheck v1.2.0
 	github.com/valyala/fasthttp v1.68.0
 )
 
